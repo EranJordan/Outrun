@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "426577528913",
+    "firebase_url": "https://outrun-73526.firebaseio.com",
+    "project_id": "outrun-73526",
+    "storage_bucket": "outrun-73526.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426577528913:android:02a322bb6fc122cd",
+        "android_client_info": {
+          "package_name": "com.outrun.outrun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "426577528913-os3vkn2rii1gg3v433o7afdncfak94ho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.outrun.outrun",
+            "certificate_hash": "357e1f056e9beddb44a4276ccb6bebbc4a79f1da"
+          }
+        },
+        {
+          "client_id": "426577528913-nj85tmur26pcog6akllb9pt3ten6j840.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXTazq7OxmeRV7O46mkrXguqXMHUFnHV8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "426577528913-nj85tmur26pcog6akllb9pt3ten6j840.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
