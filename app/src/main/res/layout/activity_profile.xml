@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.outrun.outrun.ProfileActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/name_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="19dp"
+            android:layout_alignBottom="@+id/profile_imageView"
+            android:layout_marginBottom="11dp"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/signout_button"
+            android:layout_weight="1"
+            android:allowUndo="true"
+            app:layout_constraintBottom_toTopOf="@+id/run_text"
+            app:layout_constraintStart_toEndOf="@+id/profile_imageView"
+            tools:text="username" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/map_button"
+            android:layout_width="50dp"
+            android:layout_height="46dp"
+            android:layout_alignEnd="@+id/profile_imageView"
+            android:layout_below="@+id/profile_imageView"
+            android:layout_marginTop="47dp"
+            android:clickable="true"
+            app:layout_constraintTop_toBottomOf="@+id/profile_imageView"
+            app:srcCompat="@android:drawable/ic_dialog_map"
+            tools:layout_editor_absoluteX="16dp" />
+
+        <ImageView
+            android:id="@+id/profile_imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:maxHeight="130px"
+            android:maxWidth="130px"
+            android:minHeight="130px"
+            android:minWidth="130px"
+            android:scaleType="centerInside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@color/common_google_signin_btn_text_dark_disabled"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/signout_button"
+            android:layout_width="46dp"
+            android:layout_height="52dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/map_button"
+            android:layout_marginBottom="32dp"
+            android:clickable="true"
+            app:backgroundTint="@android:color/darker_gray"
+            app:layout_constraintEnd_toStartOf="@+id/signout_text"
+            app:layout_constraintTop_toBottomOf="@+id/map_button"
+            app:srcCompat="@drawable/ic_action_name" />
+
+        <TextView
+            android:id="@+id/run_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/map_button"
+            android:layout_alignStart="@+id/name_textView"
+            android:layout_marginBottom="8dp"
+            android:text="Start Running"
+            app:layout_constraintBottom_toTopOf="@+id/signout_text"
+            tools:layout_editor_absoluteX="83dp"
+            tools:text="Start Running" />
+
+        <TextView
+            android:id="@+id/signout_text"
+            android:layout_width="wrap_content"
+            android:layout_height="18dp"
+            android:layout_alignBottom="@+id/signout_button"
+            android:layout_alignEnd="@+id/name_textView"
+            android:layout_marginBottom="8dp"
+            android:text="Sign Out"
+            tools:layout_editor_absoluteX="85dp"
+            tools:layout_editor_absoluteY="415dp" />
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

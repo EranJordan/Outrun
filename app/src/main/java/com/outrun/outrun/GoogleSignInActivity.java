@@ -1,13 +1,16 @@
 package com.outrun.outrun;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -31,26 +34,20 @@ public class GoogleSignInActivity extends BaseActivity implements
     private static final int RC_SIGN_IN = 9001;
 
     // [START declare_auth]
-    private FirebaseAuth mAuth;
+    public FirebaseAuth mAuth;
     // [END declare_auth]
 
     private GoogleSignInClient mGoogleSignInClient;
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_sign_in);
 
-        // Views
-        mStatusTextView = findViewById(R.id.status);
-        mDetailTextView = findViewById(R.id.detail);
-
         // Button listeners
+
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.disconnect_button).setOnClickListener(this);
 
         // [START config_signin]
         // Configure Google Sign In
@@ -89,6 +86,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
+                redirect(); //~~~~!~~~!!~!   new
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
@@ -140,6 +138,11 @@ public class GoogleSignInActivity extends BaseActivity implements
     }
     // [END signin]
 
+    private void redirect() {
+        //After signing in takes us to Main page (atm ProfileActivity)
+        Intent signedIn = new Intent(this, ProfileActivity.class);
+        startActivity(signedIn);
+    }
     private void signOut() {
         // Firebase sign out
         mAuth.signOut();
@@ -154,37 +157,22 @@ public class GoogleSignInActivity extends BaseActivity implements
                 });
     }
 
-    private void revokeAccess() {
-        // Firebase sign out
-        mAuth.signOut();
-
-        // Google revoke access
-        mGoogleSignInClient.revokeAccess().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        updateUI(null);
-                    }
-                });
-    }
-
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-
-            //After signing in takes us to Main page (atm MapsActivity)
-            Intent signedIn = new Intent(this, MapsActivity.class);
-            startActivity(signedIn);
-//            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+            String name = user.getDisplayName();
+            final TextView nameTextView = findViewById(R.id.name_textView);
+            nameTextView.setText(name);
+            Uri profileImage = user.getPhotoUrl();
+            Glide.with(this).load(profileImage).into((ImageView) findViewById(R.id.profile_imageView));
+            findViewById(R.id.profile_imageView).setVisibility(View.VISIBLE);
+            findViewById(R.id.name_textView).setVisibility(View.VISIBLE);
+            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
         } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
-
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.profile_imageView).setVisibility(View.GONE);
+            findViewById(R.id.name_textView).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
     }
@@ -196,8 +184,6 @@ public class GoogleSignInActivity extends BaseActivity implements
             signIn();
         } else if (i == R.id.sign_out_button) {
             signOut();
-        } else if (i == R.id.disconnect_button) {
-            revokeAccess();
         }
     }
 }
