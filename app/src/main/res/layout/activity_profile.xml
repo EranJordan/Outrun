@@ -70,10 +70,9 @@
         <TextView
             android:id="@+id/run_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:layout_alignBottom="@+id/map_button"
             android:layout_alignStart="@+id/name_textView"
-            android:layout_marginBottom="8dp"
             android:text="Start Running"
             app:layout_constraintBottom_toTopOf="@+id/signout_text"
             tools:layout_editor_absoluteX="83dp"
@@ -82,10 +81,9 @@
         <TextView
             android:id="@+id/signout_text"
             android:layout_width="wrap_content"
-            android:layout_height="18dp"
+            android:layout_height="30dp"
             android:layout_alignBottom="@+id/signout_button"
             android:layout_alignEnd="@+id/name_textView"
-            android:layout_marginBottom="8dp"
             android:text="Sign Out"
             tools:layout_editor_absoluteX="85dp"
             tools:layout_editor_absoluteY="415dp" />

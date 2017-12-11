@@ -48,6 +48,7 @@ public class GoogleSignInActivity extends BaseActivity implements
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
+        findViewById(R.id.profile_button).setOnClickListener(this);
 
         // [START config_signin]
         // Configure Google Sign In
@@ -168,9 +169,11 @@ public class GoogleSignInActivity extends BaseActivity implements
             Glide.with(this).load(profileImage).into((ImageView) findViewById(R.id.profile_imageView));
             findViewById(R.id.profile_imageView).setVisibility(View.VISIBLE);
             findViewById(R.id.name_textView).setVisibility(View.VISIBLE);
+            findViewById(R.id.profile_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.profile_button).setVisibility(View.GONE);
             findViewById(R.id.profile_imageView).setVisibility(View.GONE);
             findViewById(R.id.name_textView).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
@@ -184,6 +187,10 @@ public class GoogleSignInActivity extends BaseActivity implements
             signIn();
         } else if (i == R.id.sign_out_button) {
             signOut();
+        } else if (i == R.id.profile_button) {
+            Intent profile = new Intent(this, ProfileActivity.class);
+            startActivity(profile);
         }
+
     }
 }

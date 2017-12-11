@@ -22,6 +22,8 @@ public class ProfileActivity extends AppCompatActivity  implements View.OnClickL
         setContentView(R.layout.activity_profile);
         findViewById(R.id.map_button).setOnClickListener(this);
         findViewById(R.id.signout_button).setOnClickListener(this);
+        findViewById(R.id.run_text).setOnClickListener(this);
+        findViewById(R.id.signout_text).setOnClickListener(this);
         name = account.getDisplayName();
         Uri profileImage = account.getPhotoUrl();
         Glide.with(this).load(profileImage).into((ImageView) findViewById(R.id.profile_imageView));
@@ -34,10 +36,12 @@ public class ProfileActivity extends AppCompatActivity  implements View.OnClickL
         int i = v.getId();
         switch(i) {
             case R.id.map_button:
+            case R.id.run_text:
                 Intent mapIntent = new Intent(this, MapsActivity.class);
                 startActivity(mapIntent);
                 break;
             case R.id.signout_button:
+            case R.id.signout_text:
                Intent signOut = new Intent(this, GoogleSignInActivity.class);
                startActivity(signOut);
                break;
