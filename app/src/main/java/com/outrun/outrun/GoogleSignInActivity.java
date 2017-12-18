@@ -23,6 +23,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Demonstrate Firebase Authentication using a Google ID Token.
@@ -38,6 +43,8 @@ public class GoogleSignInActivity extends BaseActivity implements
     // [END declare_auth]
 
     private GoogleSignInClient mGoogleSignInClient;
+    private DatabaseReference mDatabase;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +70,15 @@ public class GoogleSignInActivity extends BaseActivity implements
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
+        mAuthListener = new FirebaseAuth.AuthStateListener() { //Listens to authentication status and updates database if authenticated
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (mAuth.getCurrentUser() != null) {
+                    updateDatabase();
+                }
+            }
+        };
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     // [START on_start_check_user]
@@ -88,6 +104,8 @@ public class GoogleSignInActivity extends BaseActivity implements
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
                 redirect(); //~~~~!~~~!!~!   new
+            //    updateDatabase(); //@>#! new
+
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
@@ -105,7 +123,6 @@ public class GoogleSignInActivity extends BaseActivity implements
         // [START_EXCLUDE silent]
         showProgressDialog();
         // [END_EXCLUDE]
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -139,6 +156,7 @@ public class GoogleSignInActivity extends BaseActivity implements
     }
     // [END signin]
 
+
     private void redirect() {
         //After signing in takes us to Main page (atm ProfileActivity)
         Intent signedIn = new Intent(this, ProfileActivity.class);
@@ -171,7 +189,8 @@ public class GoogleSignInActivity extends BaseActivity implements
             findViewById(R.id.name_textView).setVisibility(View.VISIBLE);
             findViewById(R.id.profile_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-        } else {
+        }
+        else {
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.profile_button).setVisibility(View.GONE);
             findViewById(R.id.profile_imageView).setVisibility(View.GONE);
@@ -192,5 +211,24 @@ public class GoogleSignInActivity extends BaseActivity implements
             startActivity(profile);
         }
 
+    }
+
+    private void updateDatabase() {
+        //Check if user is in database, if not add him
+        final String userUid = mAuth.getCurrentUser().getUid();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.child("users").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) { //if user doesn't exist, add to database
+                    mDatabase.child("users").child(userUid).setValue(userUid);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

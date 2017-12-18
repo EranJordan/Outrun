@@ -76,7 +76,7 @@ public abstract class PermissionUtils {
             mFinishActivity = getArguments().getBoolean(ARGUMENT_FINISH_ACTIVITY);
 
             return new AlertDialog.Builder(getActivity())
-                    .setMessage("WE NEED THAT PERMISSION WE CANT DO ANYTHING WITHOUT IT!!")
+                    .setMessage("The app cannot function without location permissions.")
                     .setPositiveButton(android.R.string.ok, null)
                     .create();
         }
@@ -136,7 +136,7 @@ public abstract class PermissionUtils {
             mFinishActivity = arguments.getBoolean(ARGUMENT_FINISH_ACTIVITY);
 
             return new AlertDialog.Builder(getActivity())
-                    .setMessage("WE NEED LOCATION PERMISSION THIS IS A MAP APP thanks")
+                    .setMessage("This is a location based app. We need location permission for our basic functions.")
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

@@ -2,6 +2,7 @@ package com.outrun.outrun;
 
 import android.*;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -15,9 +16,13 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -27,6 +32,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.FirebaseDatabase;
 import com.outrun.outrun.*;
 import com.outrun.outrun.R;
 
@@ -54,7 +60,7 @@ public class CreateCourseActivity extends AppCompatActivity
     private String provider;
     private ArrayList<MarkerOptions> markers;
     private Course course;
-    private PolylineOptions polyline;
+    TextView distanceTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +72,8 @@ public class CreateCourseActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         markers = new ArrayList<>();
-        course = new Course(new ArrayList<LatLng>());
-        polyline = new PolylineOptions().color(Color.BLUE).width((float) 7.0);
+        course = new Course();
+        distanceTextView = findViewById(R.id.distance_textView);
     }
 
 
@@ -177,8 +183,57 @@ public class CreateCourseActivity extends AppCompatActivity
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(View v) {
+        int i = v.getId();
+        if (i == R.id.done_button) {
+            finishCourse();
+        }
+    }
 
+    private void finishCourse() {
+        if(course.getSize() < 2) {
+            Toast.makeText(this, "Please choose at least 2 points", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setMessage("Select course type")
+                .setTitle("Finish course");
+        builder.setPositiveButton("A -> B", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+               return;
+            }
+        });
+        builder.setNegativeButton("A -> A", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                PolylineOptions polyLine = new PolylineOptions().color(
+                        Color.BLUE).width((float) 7.0);
+                LatLng point = course.get(0);
+                course.addPoint(point);
+                polyLine.add(point);
+                LatLng previousPoint = course.get(course.getSize() - 2);
+                polyLine.add(previousPoint);
+                String url = getDirectionsUrl(point, previousPoint);
+                DownloadTask downloadTask = new DownloadTask();
+                // Start downloading json data from Google Directions API
+                downloadTask.execute(url);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        //Toast.makeText(this, "Distance: " + String.valueOf(course.getDistance()), Toast.LENGTH_SHORT).show();
+        //database stuff
+        uploadCourseToDatabase();
+    }
+
+    private void uploadCourseToDatabase() {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+       // database
+
+    }
+
+    public Context getActivity() {
+        return this;
     }
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
@@ -246,14 +301,24 @@ public class CreateCourseActivity extends AppCompatActivity
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
-
                     points.add(position);
+                    if(j > 0) {
+                        course.updateDist(position, (LatLng)points.get(j-1));
+
+                    }
                 }
                 lineOptions.addAll(points);
+                course.addPolyLine(lineOptions);
             }
 
 // Drawing polyline in the Google Map for the i-th route
-            if(points != null) if(points.size()!=0)mMap.addPolyline(lineOptions);
+            if(points != null) {
+                if(points.size()!= 0) {
+                    mMap.addPolyline(lineOptions);  //this line is bad
+                    distanceTextView.setText("Distance: " + course.getDistance() + "m");
+
+                }
+            }
         }
     }
 
@@ -319,5 +384,7 @@ public class CreateCourseActivity extends AppCompatActivity
         }
         return data;
     }
+
+
 
 }
