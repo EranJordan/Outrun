@@ -2,6 +2,7 @@ package com.outrun.outrun;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -194,11 +195,15 @@ public class CreateCourseActivity extends AppCompatActivity
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+        final Intent mapIntent = new Intent(this, MapsActivity.class);
+
         builder.setMessage("Select course type")
                 .setTitle("Finish course");
         builder.setPositiveButton("A -> B", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-               return;
+                uploadCourseToDatabase();
+                Toast.makeText(CreateCourseActivity.this, "Course Created", Toast.LENGTH_SHORT).show();
+                startActivity(mapIntent);
             }
         });
         builder.setNegativeButton("A -> A", new DialogInterface.OnClickListener() {
@@ -214,13 +219,16 @@ public class CreateCourseActivity extends AppCompatActivity
                 DownloadTask downloadTask = new DownloadTask();
                 // Start downloading json data from Google Directions API
                 downloadTask.execute(url);
+                uploadCourseToDatabase();
+                Toast.makeText(CreateCourseActivity.this, "Course Created", Toast.LENGTH_SHORT).show();
+                startActivity(mapIntent);
             }
         });
         AlertDialog dialog = builder.create();
         dialog.show();
         //Toast.makeText(this, "Distance: " + String.valueOf(course.getDistance()), Toast.LENGTH_SHORT).show();
         //database stuff
-        uploadCourseToDatabase();
+        //uploadCourseToDatabase();
     }
 
     private void uploadCourseToDatabase() {
