@@ -5,9 +5,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class Course {
-    ArrayList<LatLng> points;
-    ArrayList<PolylineOptions> polylines;
-    long distance;
+    public ArrayList<LatLng> points;
+    public ArrayList<PolylineOptions> polylines;
+    public long distance;
 
     public Course() {
         this.points = new ArrayList<>();

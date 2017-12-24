@@ -1,9 +1,7 @@
 package com.outrun.outrun;
 
-import android.*;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -12,7 +10,6 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
@@ -28,13 +25,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.outrun.outrun.*;
-import com.outrun.outrun.R;
 
 import org.json.JSONObject;
 
@@ -60,7 +55,9 @@ public class CreateCourseActivity extends AppCompatActivity
     private String provider;
     private ArrayList<MarkerOptions> markers;
     private Course course;
+    private DatabaseReference mDatabase;
     TextView distanceTextView;
+    public FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -227,9 +224,12 @@ public class CreateCourseActivity extends AppCompatActivity
     }
 
     private void uploadCourseToDatabase() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        final String userUid = mAuth.getCurrentUser().getUid();
+        DatabaseReference courseRef =  mDatabase.child("users").child(userUid).push();
+        courseRef.setValue(course);
        // database
-
     }
 
     public Context getActivity() {
@@ -322,7 +322,6 @@ public class CreateCourseActivity extends AppCompatActivity
         }
     }
 
-
     public String getDirectionsUrl(LatLng origin, LatLng dest) {
 
         // Origin of route
@@ -384,7 +383,4 @@ public class CreateCourseActivity extends AppCompatActivity
         }
         return data;
     }
-
-
-
 }

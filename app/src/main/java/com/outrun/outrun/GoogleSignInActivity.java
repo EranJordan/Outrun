@@ -41,7 +41,7 @@ public class GoogleSignInActivity extends BaseActivity implements
     // [START declare_auth]
     public FirebaseAuth mAuth;
     // [END declare_auth]
-
+    public static String firebaseUid;
     private GoogleSignInClient mGoogleSignInClient;
     private DatabaseReference mDatabase;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -132,6 +132,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            firebaseUid = user.getUid();
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -231,4 +232,5 @@ public class GoogleSignInActivity extends BaseActivity implements
             }
         });
     }
+
 }
