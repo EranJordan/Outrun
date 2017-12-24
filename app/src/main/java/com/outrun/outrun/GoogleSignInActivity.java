@@ -41,7 +41,6 @@ public class GoogleSignInActivity extends BaseActivity implements
     // [START declare_auth]
     public FirebaseAuth mAuth;
     // [END declare_auth]
-
     private GoogleSignInClient mGoogleSignInClient;
     private DatabaseReference mDatabase;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -231,4 +230,5 @@ public class GoogleSignInActivity extends BaseActivity implements
             }
         });
     }
+
 }

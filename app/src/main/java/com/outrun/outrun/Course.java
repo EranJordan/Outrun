@@ -5,21 +5,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class Course {
-    ArrayList<LatLng> points;
-    ArrayList<PolylineOptions> polylines;
-    long distance;
+    public ArrayList<LatLng> points;
+   // public ArrayList<PolylineOptions> polylines;
+    public long distance;
 
     public Course() {
         this.points = new ArrayList<>();
         distance = 0;
-        polylines = new ArrayList<>();
+        //polylines = new ArrayList<>();
     }
 
     public ArrayList<LatLng> getPoints(){
         return this.points;
     }
 
-    public ArrayList<PolylineOptions> getPolylines() { return this.polylines; }
+    //public ArrayList<PolylineOptions> getPolylines() { return this.polylines; }
 
     public LatLng get(int i) {
         return this.points.get(i);
@@ -33,9 +33,11 @@ public class Course {
         points.add(point);
     }
 
+/*
     public void addPolyLine(PolylineOptions polyline) {
         polylines.add(polyline);
     }
+*/
 
     public void updateDist(LatLng a, LatLng b) {
         distance += distance(a,b);

@@ -1,6 +1,5 @@
 package com.outrun.outrun;
 
-import android.*;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,7 +11,6 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
@@ -28,13 +26,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.outrun.outrun.*;
-import com.outrun.outrun.R;
 
 import org.json.JSONObject;
 
@@ -60,7 +56,9 @@ public class CreateCourseActivity extends AppCompatActivity
     private String provider;
     private ArrayList<MarkerOptions> markers;
     private Course course;
+    private DatabaseReference mDatabase;
     TextView distanceTextView;
+    public FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,11 +195,15 @@ public class CreateCourseActivity extends AppCompatActivity
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+        final Intent mapIntent = new Intent(this, MapsActivity.class);
+
         builder.setMessage("Select course type")
                 .setTitle("Finish course");
         builder.setPositiveButton("A -> B", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-               return;
+                uploadCourseToDatabase();
+                Toast.makeText(CreateCourseActivity.this, "Course Created", Toast.LENGTH_SHORT).show();
+                startActivity(mapIntent);
             }
         });
         builder.setNegativeButton("A -> A", new DialogInterface.OnClickListener() {
@@ -217,19 +219,25 @@ public class CreateCourseActivity extends AppCompatActivity
                 DownloadTask downloadTask = new DownloadTask();
                 // Start downloading json data from Google Directions API
                 downloadTask.execute(url);
+                uploadCourseToDatabase();
+                Toast.makeText(CreateCourseActivity.this, "Course Created", Toast.LENGTH_SHORT).show();
+                startActivity(mapIntent);
             }
         });
         AlertDialog dialog = builder.create();
         dialog.show();
         //Toast.makeText(this, "Distance: " + String.valueOf(course.getDistance()), Toast.LENGTH_SHORT).show();
         //database stuff
-        uploadCourseToDatabase();
+        //uploadCourseToDatabase();
     }
 
     private void uploadCourseToDatabase() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        final String userUid = mAuth.getCurrentUser().getUid();
+        DatabaseReference courseRef =  mDatabase.child("users").child(userUid).push();
+        courseRef.setValue(course);
        // database
-
     }
 
     public Context getActivity() {
@@ -308,7 +316,7 @@ public class CreateCourseActivity extends AppCompatActivity
                     }
                 }
                 lineOptions.addAll(points);
-                course.addPolyLine(lineOptions);
+              //  course.addPolyLine(lineOptions);
             }
 
 // Drawing polyline in the Google Map for the i-th route
@@ -321,7 +329,6 @@ public class CreateCourseActivity extends AppCompatActivity
             }
         }
     }
-
 
     public String getDirectionsUrl(LatLng origin, LatLng dest) {
 
@@ -384,7 +391,4 @@ public class CreateCourseActivity extends AppCompatActivity
         }
         return data;
     }
-
-
-
 }
