@@ -308,7 +308,7 @@ public class CreateCourseActivity extends AppCompatActivity
                     }
                 }
                 lineOptions.addAll(points);
-                course.addPolyLine(lineOptions);
+              //  course.addPolyLine(lineOptions);
             }
 
 // Drawing polyline in the Google Map for the i-th route
