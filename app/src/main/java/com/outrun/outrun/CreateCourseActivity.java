@@ -26,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,6 +58,7 @@ public class CreateCourseActivity extends AppCompatActivity
     private ArrayList<MarkerOptions> markers;
     private Course course;
     private DatabaseReference mDatabase;
+    private DownloadUtils downloadUtils = new DownloadUtils();
     TextView distanceTextView;
     public FirebaseAuth mAuth;
 
@@ -106,14 +108,17 @@ public class CreateCourseActivity extends AppCompatActivity
                     polyLine.add(point);
                     LatLng previousPoint = course.get(course.getSize() - 2);
                     polyLine.add(previousPoint);
-                    String url = getDirectionsUrl(point, previousPoint);
-
                     DownloadTask downloadTask = new DownloadTask();
-
+                    String url = downloadUtils.getDirectionsUrl(point, previousPoint);
                     // Start downloading json data from Google Directions API
                     downloadTask.execute(url);
-                 //   mMap.addPolyline(polyLine);
                 }
+            }
+        });
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                return true;
             }
         });
     }
@@ -133,7 +138,7 @@ public class CreateCourseActivity extends AppCompatActivity
             Criteria criteria = new Criteria();
             provider = locationManager.getBestProvider(criteria, false);
             Location pos = locationManager.getLastKnownLocation(provider);
-            mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(pos.getLatitude(), pos.getLongitude()) , 14.0f) );
+            mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(pos.getLatitude(), pos.getLongitude()) , 17.0f) );
         }
     }
 
@@ -215,7 +220,7 @@ public class CreateCourseActivity extends AppCompatActivity
                 polyLine.add(point);
                 LatLng previousPoint = course.get(course.getSize() - 2);
                 polyLine.add(previousPoint);
-                String url = getDirectionsUrl(point, previousPoint);
+                String url = downloadUtils.getDirectionsUrl(point, previousPoint);
                 DownloadTask downloadTask = new DownloadTask();
                 // Start downloading json data from Google Directions API
                 downloadTask.execute(url);
@@ -226,18 +231,15 @@ public class CreateCourseActivity extends AppCompatActivity
         });
         AlertDialog dialog = builder.create();
         dialog.show();
-        //Toast.makeText(this, "Distance: " + String.valueOf(course.getDistance()), Toast.LENGTH_SHORT).show();
-        //database stuff
-        //uploadCourseToDatabase();
     }
 
     private void uploadCourseToDatabase() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         final String userUid = mAuth.getCurrentUser().getUid();
+        course.userUid = userUid;
         DatabaseReference courseRef =  mDatabase.child("users").child(userUid).push();
         courseRef.setValue(course);
-       // database
     }
 
     public Context getActivity() {
@@ -252,7 +254,7 @@ public class CreateCourseActivity extends AppCompatActivity
             String data = "";
 
             try {
-                data = downloadUrl(url[0]);
+                data = downloadUtils.downloadUrl(url[0]);
             } catch (Exception e) {
                 Log.d("Background Task", e.toString());
             }
@@ -295,8 +297,6 @@ public class CreateCourseActivity extends AppCompatActivity
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
             ArrayList points = null;
             PolylineOptions lineOptions = null;
-            MarkerOptions markerOptions = new MarkerOptions();
-
             for (int i = 0; i < result.size(); i++) {
                 points = new ArrayList();
                 lineOptions = new PolylineOptions();
@@ -312,11 +312,10 @@ public class CreateCourseActivity extends AppCompatActivity
                     points.add(position);
                     if(j > 0) {
                         course.updateDist(position, (LatLng)points.get(j-1));
-
                     }
                 }
+             //   course.points.addAll(course.getSize() - 1, points); //add all intermediate points between the 2 points the user clicked on
                 lineOptions.addAll(points);
-              //  course.addPolyLine(lineOptions);
             }
 
 // Drawing polyline in the Google Map for the i-th route
@@ -328,67 +327,5 @@ public class CreateCourseActivity extends AppCompatActivity
                 }
             }
         }
-    }
-
-    public String getDirectionsUrl(LatLng origin, LatLng dest) {
-
-        // Origin of route
-        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-
-        // Destination of route
-        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-
-        // Sensor enabled
-        String sensor = "sensor=false";
-        String mode = "mode=walking";
-        // Building the parameters to the web service
-        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&" + mode;
-
-        // Output format
-        String output = "json";
-
-        // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
-
-
-        return url;
-    }
-
-    /**
-     * A method to download json data from url
-     */
-     public String downloadUrl(String strUrl) throws IOException {
-        String data = "";
-        InputStream iStream = null;
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL(strUrl);
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.connect();
-
-            iStream = urlConnection.getInputStream();
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
-            StringBuffer sb = new StringBuffer();
-
-            String line = "";
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-
-            data = sb.toString();
-
-            br.close();
-
-        } catch (Exception e) {
-            Log.d("Exception", e.toString());
-        } finally {
-            iStream.close();
-            urlConnection.disconnect();
-        }
-        return data;
     }
 }

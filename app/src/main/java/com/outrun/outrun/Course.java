@@ -6,8 +6,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class Course {
     public ArrayList<LatLng> points;
-   // public ArrayList<PolylineOptions> polylines;
     public long distance;
+    public String userUid;
 
     public Course() {
         this.points = new ArrayList<>();
@@ -62,6 +62,7 @@ public class Course {
         double e = R * d;
         return (long)e;
     }
+
 
 
 

@@ -7,22 +7,42 @@ import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class MapsActivity extends AppCompatActivity
         implements
@@ -37,6 +57,9 @@ public class MapsActivity extends AppCompatActivity
     private boolean mPermissionDenied = false;
     private LocationManager locationManager;
     private String provider;
+    private BitmapDescriptor courseIcon;
+    private DownloadUtils downloadUtils = new DownloadUtils();
+    private List<Polyline> polylines;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +70,8 @@ public class MapsActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        courseIcon = BitmapDescriptorFactory.fromResource(R.mipmap.ic_course_round);
+        polylines = new ArrayList<Polyline>();
     }
 
 
@@ -65,7 +90,37 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         enableLocation();
+        displayCourses();
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+               // polyLine.visible(false);
+                if(polylines.size() > 0) {
+                   for(int i = 0; i < polylines.size(); i++) polylines.get(i).remove();
+                   polylines.clear();
+                }
 
+                Course course = (Course) marker.getTag();
+                for(int i = 1; i < course.getSize(); i ++) {
+                    DownloadTask downloadTask = new DownloadTask();
+                    LatLng previousPoint = course.get(i - 1);
+                    LatLng point = course.get(i);
+                    String url = downloadUtils.getDirectionsUrl(point, previousPoint);
+                    // Start downloading json data from Google Directions API
+                    downloadTask.execute(url);
+                }
+                return true;
+            }
+        });
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if(polylines.size() > 0) {
+                    for(int i = 0; i < polylines.size(); i++) polylines.get(i).remove();
+                    polylines.clear();
+                }
+            }
+        });
     }
 
     private void enableLocation() {
@@ -83,7 +138,7 @@ public class MapsActivity extends AppCompatActivity
             Criteria criteria = new Criteria();
             provider = locationManager.getBestProvider(criteria, false);
             Location pos = locationManager.getLastKnownLocation(provider);
-            mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(pos.getLatitude(), pos.getLongitude()) , 14.0f) );
+            mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(pos.getLatitude(), pos.getLongitude()) , 17.0f) );
         }
     }
 
@@ -122,13 +177,43 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    private void drawCourse(Course course) {
-        PolylineOptions polyline = new PolylineOptions().color(Color.BLUE).width((float) 7.0);
-        ArrayList<LatLng> points = course.getPoints();
-        for(int i = 0; i < points.size(); i++) {
-            polyline.add(points.get(i));
-        }
-        mMap.addPolyline(polyline);
+    private void displayCourses() {
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference reference = mDatabase.child("users");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot user : dataSnapshot.getChildren() ){ //for each user
+                    for(DataSnapshot course : user.getChildren()) { //go over every course
+                        DataSnapshot points = course.child("points");
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(getLatLngFromDatabase(points, "0")).icon(courseIcon));
+                        Course curCourse = getCourseFromDatabase(course);
+                        marker.setTag(curCourse);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
+
+    public Course getCourseFromDatabase(DataSnapshot ref) {
+            Course course = new Course();
+            course.distance = (long) ref.child("distance").getValue();
+            course.userUid = (String) ref.child("userUid").getValue();
+            long size = (long) ref.child("size").getValue();
+            DataSnapshot points = ref.child("points");
+            for(int i = 0; i < size; i++) {
+                course.addPoint(getLatLngFromDatabase(points, String.valueOf(i)));
+            }
+            return course;
+    }
+    public LatLng getLatLngFromDatabase(DataSnapshot ref, String i) { //gets "points" reference and index of point
+        DataSnapshot point = ref.child(i);
+        double lat = (double) point.child("latitude").getValue();
+        double lng = (double) point.child("longitude").getValue();
+        return new LatLng(lat, lng);
     }
 
     /**
@@ -141,12 +226,84 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        int i = v.getId();
-        switch(i) {
+        int j = v.getId();
+        switch(j) {
             case R.id.course_button:
+                if(polylines.size() > 0) {
+                    for(int i = 0; i < polylines.size(); i++) polylines.get(i).remove();
+                    polylines.clear();
+                }
                 Intent createCourseIntent = new Intent(this, CreateCourseActivity.class);
                 startActivity(createCourseIntent);
                 break;
+        }
+    }
+    public class DownloadTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... url) {
+
+            String data = "";
+
+            try {
+                data = downloadUtils.downloadUrl(url[0]);
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+
+            parserTask.execute(result);
+
+        }
+    }
+
+    public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+                jObject = new JSONObject(jsonData[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                routes = parser.parse(jObject);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList points;
+            for (int i = 0; i < result.size(); i++) {
+                points = new ArrayList();
+                List<HashMap<String, String>> path = result.get(i);
+
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+                    points.add(position);
+                }
+                polylines.add(mMap.addPolyline(new PolylineOptions().addAll(points)));
+            }
+
         }
     }
 }
