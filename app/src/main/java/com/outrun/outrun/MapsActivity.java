@@ -94,7 +94,8 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-               // polyLine.visible(false);
+
+                mMap.animateCamera( CameraUpdateFactory.newLatLng(marker.getPosition()) );
                 if(polylines.size() > 0) {
                    for(int i = 0; i < polylines.size(); i++) polylines.get(i).remove();
                    polylines.clear();
@@ -109,6 +110,7 @@ public class MapsActivity extends AppCompatActivity
                     // Start downloading json data from Google Directions API
                     downloadTask.execute(url);
                 }
+
                 return true;
             }
         });
@@ -222,6 +224,13 @@ public class MapsActivity extends AppCompatActivity
     private void showMissingPermissionError() {
         PermissionUtils.PermissionDeniedDialog
                 .newInstance(true).show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(this,ProfileActivity.class);
+        startActivity(intent);
     }
 
     @Override

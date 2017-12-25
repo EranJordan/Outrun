@@ -8,11 +8,12 @@ public class Course {
     public ArrayList<LatLng> points;
     public long distance;
     public String userUid;
+ //   public ArrayList<LeaderboardEntry> leaderboard;
 
     public Course() {
         this.points = new ArrayList<>();
-        distance = 0;
-        //polylines = new ArrayList<>();
+  //      this.leaderboard = new ArrayList<>();
+        this.distance = 0;
     }
 
     public ArrayList<LatLng> getPoints(){
