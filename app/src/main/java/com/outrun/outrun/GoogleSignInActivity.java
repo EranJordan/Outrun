@@ -214,14 +214,16 @@ public class GoogleSignInActivity extends BaseActivity implements
 
     private void updateDatabase() {
         //Check if user is in database, if not add him
-        final String userUid = mAuth.getCurrentUser().getUid();
+        final FirebaseUser user = mAuth.getCurrentUser();
+        final String userUid = user.getUid();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.child("users").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) { //if user doesn't exist, add to database
                     mDatabase.child("users").child(userUid).setValue(userUid);
-                    mDatabase.child("users").child(userUid).child("name").setValue(mAuth.getCurrentUser().getDisplayName());
+                    mDatabase.child("users").child(userUid).child("name").setValue(user.getDisplayName());
+                    mDatabase.child("users").child(userUid).child("photo").setValue(user.getPhotoUrl().toString());
                 }
             }
 

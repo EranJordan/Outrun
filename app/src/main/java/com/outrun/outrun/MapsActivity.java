@@ -188,7 +188,7 @@ public class MapsActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot user : dataSnapshot.getChildren() ){ //for each user
                     for(DataSnapshot course : user.getChildren()) { //go over every course
-                        if(course.getKey().equals("name")) continue;
+                        if(course.getKey().equals("name") || course.getKey().equals("photo")) continue;
                         DataSnapshot points = course.child("points");
                         Marker marker = mMap.addMarker(new MarkerOptions().position(getLatLngFromDatabase(points, "0")).icon(courseIcon).title(makeTitle((String)user.child("name").getValue())));
                         Course curCourse = getCourseFromDatabase(course);
