@@ -242,6 +242,13 @@ public class CreateCourseActivity extends AppCompatActivity
         courseRef.setValue(course);
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(this,MapsActivity.class); //go to new instance of mapsactivity
+        startActivity(intent);
+    }
+
     public Context getActivity() {
         return this;
     }

@@ -1,6 +1,10 @@
 package com.outrun.outrun;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -8,11 +12,11 @@ public class Course {
     public ArrayList<LatLng> points;
     public long distance;
     public String userUid;
- //   public ArrayList<LeaderboardEntry> leaderboard;
+   // public TreeSet<LeaderboardEntry> leaderboard;
 
     public Course() {
         this.points = new ArrayList<>();
-  //      this.leaderboard = new ArrayList<>();
+      //  this.leaderboard = new TreeSet<LeaderboardEntry>(new entryComparator);
         this.distance = 0;
     }
 
@@ -20,7 +24,6 @@ public class Course {
         return this.points;
     }
 
-    //public ArrayList<PolylineOptions> getPolylines() { return this.polylines; }
 
     public LatLng get(int i) {
         return this.points.get(i);
@@ -34,11 +37,6 @@ public class Course {
         points.add(point);
     }
 
-/*
-    public void addPolyLine(PolylineOptions polyline) {
-        polylines.add(polyline);
-    }
-*/
 
     public void updateDist(LatLng a, LatLng b) {
         distance += distance(a,b);
@@ -65,6 +63,10 @@ public class Course {
     }
 
 
-
-
+    private class entryComparator implements Comparator<LeaderboardEntry> {
+        @Override
+        public int compare(LeaderboardEntry x, LeaderboardEntry y) {
+            return Long.compare(x.time, y.time);
+        }
+    }
 }

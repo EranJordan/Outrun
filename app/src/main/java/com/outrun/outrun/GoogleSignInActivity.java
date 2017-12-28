@@ -221,6 +221,7 @@ public class GoogleSignInActivity extends BaseActivity implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) { //if user doesn't exist, add to database
                     mDatabase.child("users").child(userUid).setValue(userUid);
+                    mDatabase.child("users").child(userUid).child("name").setValue(mAuth.getCurrentUser().getDisplayName());
                 }
             }
 

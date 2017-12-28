@@ -76,4 +76,5 @@
     <string name="email_fmt">Email: %s</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_create_course">Create Course</string>
+    <string name="title_activity_run_course">RunCourseActivity</string>
 </resources>

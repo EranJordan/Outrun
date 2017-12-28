@@ -56,7 +56,11 @@
         <activity android:name=".ProfileActivity" />
         <activity
             android:name=".CreateCourseActivity"
-            android:label="@string/title_activity_create_course"></activity>
+            android:label="@string/title_activity_create_course" />
+        <activity
+            android:name=".RunCourseActivity"
+            android:label="@string/title_activity_run_course"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

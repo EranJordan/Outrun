@@ -96,6 +96,7 @@ public class MapsActivity extends AppCompatActivity
             public boolean onMarkerClick(Marker marker) {
 
                 mMap.animateCamera( CameraUpdateFactory.newLatLng(marker.getPosition()) );
+                marker.showInfoWindow();
                 if(polylines.size() > 0) {
                    for(int i = 0; i < polylines.size(); i++) polylines.get(i).remove();
                    polylines.clear();
@@ -110,7 +111,7 @@ public class MapsActivity extends AppCompatActivity
                     // Start downloading json data from Google Directions API
                     downloadTask.execute(url);
                 }
-
+                //TODO: make a button that sends you to RunCourseActivity appear
                 return true;
             }
         });
@@ -187,8 +188,9 @@ public class MapsActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot user : dataSnapshot.getChildren() ){ //for each user
                     for(DataSnapshot course : user.getChildren()) { //go over every course
+                        if(course.getKey().equals("name")) continue;
                         DataSnapshot points = course.child("points");
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(getLatLngFromDatabase(points, "0")).icon(courseIcon));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(getLatLngFromDatabase(points, "0")).icon(courseIcon).title(makeTitle((String)user.child("name").getValue())));
                         Course curCourse = getCourseFromDatabase(course);
                         marker.setTag(curCourse);
                     }
@@ -246,6 +248,10 @@ public class MapsActivity extends AppCompatActivity
                 startActivity(createCourseIntent);
                 break;
         }
+    }
+
+    private String makeTitle(String name) {
+        return name.charAt(name.length() - 1) == 's' ? (name + "' course") : (name + "'s course");
     }
     public class DownloadTask extends AsyncTask<String, Void, String> {
 
