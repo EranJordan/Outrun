@@ -8,6 +8,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.Manifest;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -40,6 +43,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,33 +61,35 @@ public class MapsActivity extends AppCompatActivity
     private boolean mPermissionDenied = false;
     private LocationManager locationManager;
     private String provider;
+    public FirebaseAuth mAuth;
     private BitmapDescriptor courseIcon;
     private DownloadUtils downloadUtils = new DownloadUtils();
-    private List<Polyline> polylines;
+    public List<Polyline> polylines;
+    public CourseTag courseTag;
+    private DatabaseUtils databaseUtils;
+    ListView listView;
+    private static LeaderboardEntryAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        listView = findViewById(R.id.listView);
         findViewById(R.id.course_button).setOnClickListener(this);
+        findViewById(R.id.run_button).setOnClickListener(this);
+        findViewById(R.id.leaderboard_button).setOnClickListener(this);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         courseIcon = BitmapDescriptorFactory.fromResource(R.mipmap.ic_course_round);
-        polylines = new ArrayList<Polyline>();
+        polylines = new ArrayList();
+        databaseUtils = new DatabaseUtils();
+        mAuth = FirebaseAuth.getInstance();
     }
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+//
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -102,7 +108,8 @@ public class MapsActivity extends AppCompatActivity
                    polylines.clear();
                 }
 
-                Course course = (Course) marker.getTag();
+                courseTag = (CourseTag) marker.getTag();
+                Course course = courseTag.course;
                 for(int i = 1; i < course.getSize(); i ++) {
                     DownloadTask downloadTask = new DownloadTask();
                     LatLng previousPoint = course.get(i - 1);
@@ -111,6 +118,9 @@ public class MapsActivity extends AppCompatActivity
                     // Start downloading json data from Google Directions API
                     downloadTask.execute(url);
                 }
+                findViewById(R.id.course_button).setVisibility(View.GONE);
+                findViewById(R.id.run_button).setVisibility(View.VISIBLE);
+                findViewById(R.id.leaderboard_button).setVisibility(View.VISIBLE);
                 //TODO: make a button that sends you to RunCourseActivity appear
                 return true;
             }
@@ -122,6 +132,12 @@ public class MapsActivity extends AppCompatActivity
                     for(int i = 0; i < polylines.size(); i++) polylines.get(i).remove();
                     polylines.clear();
                 }
+                if(findViewById(R.id.listView).getVisibility() == View.VISIBLE) {
+                    findViewById(R.id.listView).setVisibility(View.GONE);
+                }
+                findViewById(R.id.run_button).setVisibility(View.GONE);
+                findViewById(R.id.leaderboard_button).setVisibility(View.GONE);
+                findViewById(R.id.course_button).setVisibility(View.VISIBLE);
             }
         });
     }
@@ -190,9 +206,9 @@ public class MapsActivity extends AppCompatActivity
                     for(DataSnapshot course : user.getChildren()) { //go over every course
                         if(course.getKey().equals("name") || course.getKey().equals("photo")) continue;
                         DataSnapshot points = course.child("points");
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(getLatLngFromDatabase(points, "0")).icon(courseIcon).title(makeTitle((String)user.child("name").getValue())));
-                        Course curCourse = getCourseFromDatabase(course);
-                        marker.setTag(curCourse);
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(databaseUtils.getLatLngFromDatabase(points, "0")).icon(courseIcon).title(makeTitle((String)user.child("name").getValue())));
+                        Course curCourse = databaseUtils.getCourseFromDatabase(course);
+                        marker.setTag(new CourseTag(curCourse, course.getKey()));
                     }
                 }
             }
@@ -202,23 +218,6 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
-    public Course getCourseFromDatabase(DataSnapshot ref) {
-            Course course = new Course();
-            course.distance = (long) ref.child("distance").getValue();
-            course.userUid = (String) ref.child("userUid").getValue();
-            long size = (long) ref.child("size").getValue();
-            DataSnapshot points = ref.child("points");
-            for(int i = 0; i < size; i++) {
-                course.addPoint(getLatLngFromDatabase(points, String.valueOf(i)));
-            }
-            return course;
-    }
-    public LatLng getLatLngFromDatabase(DataSnapshot ref, String i) { //gets "points" reference and index of point
-        DataSnapshot point = ref.child(i);
-        double lat = (double) point.child("latitude").getValue();
-        double lng = (double) point.child("longitude").getValue();
-        return new LatLng(lat, lng);
-    }
 
     /**
      * Displays a dialog with error message explaining that the location permission is missing.
@@ -231,6 +230,10 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onBackPressed()
     {
+        if(findViewById(R.id.listView).getVisibility() == View.VISIBLE) {
+            findViewById(R.id.listView).setVisibility(View.GONE);
+            return;
+        }
         Intent intent = new Intent(this,ProfileActivity.class);
         startActivity(intent);
     }
@@ -247,12 +250,44 @@ public class MapsActivity extends AppCompatActivity
                 Intent createCourseIntent = new Intent(this, CreateCourseActivity.class);
                 startActivity(createCourseIntent);
                 break;
+            case R.id.run_button:
+
+                Intent runCourseIntent = new Intent(this, RunCourseActivity.class);
+                Bundle mBundle = new Bundle();
+                mBundle.putString("thisUserUid", mAuth.getCurrentUser().getUid());
+                mBundle.putString("courseUserUid", this.courseTag.course.userUid);
+                mBundle.putString("courseID", this.courseTag.id);
+                ArrayList<PolylineOptions> polylineOptions = new ArrayList<>();
+                for(int i = 0; i < polylines.size(); i++) {
+                   polylineOptions.add(new PolylineOptions().addAll(polylines.get(i).getPoints()));
+                }
+                mBundle.putParcelableArrayList("polylineOptions", polylineOptions);
+                runCourseIntent.putExtra("bundle", mBundle);
+                startActivity(runCourseIntent);
+                break;
+            case R.id.leaderboard_button:
+                if(findViewById(R.id.listView).getVisibility() == View.VISIBLE) {
+                    findViewById(R.id.listView).setVisibility(View.GONE);
+                }
+                else showLeaderboards();
+                break;
         }
+    }
+
+    private void showLeaderboards() {
+        findViewById(R.id.listView).setVisibility(View.VISIBLE);
+        ArrayList<LeaderboardListEntry> entries = new ArrayList<>();
+        for(int i = 0; i < courseTag.course.getLeaderboardSize(); i++) {
+            entries.add(new LeaderboardListEntry(courseTag.course.leaderboard.get(i)));
+        }
+        adapter = new LeaderboardEntryAdapter(entries, getApplicationContext());
+        listView.setAdapter(adapter);
     }
 
     private String makeTitle(String name) {
         return name.charAt(name.length() - 1) == 's' ? (name + "' course") : (name + "'s course");
     }
+
     public class DownloadTask extends AsyncTask<String, Void, String> {
 
         @Override

@@ -1,27 +1,40 @@
 package com.outrun.outrun;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RunCourseActivity extends AppCompatActivity
@@ -40,22 +53,33 @@ public class RunCourseActivity extends AppCompatActivity
     private long timeStart;
     long time = 0;
     private Handler counterHandler = new Handler();
+    Course course;
+    String courseUserUid;
+    String courseID;
+    String thisUserUid;
+    private DatabaseUtils databaseUtils;
+    ArrayList<PolylineOptions> polylineOptions;
     //TODO: use parcel // serialize userUid and course object to this activity so it can upload the entry to the correct location in the database.
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        timeStart = System.currentTimeMillis();
         super.onCreate(savedInstanceState);
+        timeStart = System.currentTimeMillis();
         setContentView(R.layout.activity_run_course);
-        setContentView(com.outrun.outrun.R.layout.activity_create_course);
         findViewById(R.id.done_button).setOnClickListener(this);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        //course = new Course();
         timeTextView = findViewById(R.id.time_textView);
+        databaseUtils = new DatabaseUtils();
+
+        Bundle b = getIntent().getBundleExtra("bundle");
+        thisUserUid = b.getString("thisUserUid");
+        courseUserUid =  b.getString("courseUserUid");
+        courseID =  b.getString("courseID");
+        polylineOptions = b.getParcelableArrayList("polylineOptions");
         updateTime();
     }
 
@@ -80,7 +104,16 @@ public class RunCourseActivity extends AppCompatActivity
 
     private void uploadLeaderboardEntry() {
         long timeElapsed = System.currentTimeMillis() - timeStart; //because I don't trust android to count correctly
-        //TODO
+        LeaderboardEntry entry = new LeaderboardEntry();
+        entry.time = timeElapsed;
+        entry.userUid = thisUserUid;
+        //TODO: MAYBE: LIMIT ONE ENTRY PER USER (ONLY THE FASTEST ONE)
+        course.addAndSortEntry(entry);
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference reference = mDatabase.child("users").child(courseUserUid).child(courseID);
+        reference.setValue(course);
+        Intent intent = new Intent(this,MapsActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -99,6 +132,7 @@ public class RunCourseActivity extends AppCompatActivity
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         enableLocation();
+        draw();
     }
     private void enableLocation() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -115,9 +149,37 @@ public class RunCourseActivity extends AppCompatActivity
             Criteria criteria = new Criteria();
             provider = locationManager.getBestProvider(criteria, false);
             Location pos = locationManager.getLastKnownLocation(provider);
-            mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(pos.getLatitude(), pos.getLongitude()) , 17.0f) );
+            DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference reference = mDatabase.child("users").child(courseUserUid).child(courseID);
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    course = databaseUtils.getCourseFromDatabase(dataSnapshot);
+                    mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(course.get(0), 17.0f));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
+
+    private void draw() {
+        for(int i = 0; i < polylineOptions.size(); i++) {
+            mMap.addPolyline(polylineOptions.get(i));
+        }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(this,MapsActivity.class); //go to new instance of mapsactivity
+        startActivity(intent);
+    }
+
+
 
     public String timeToString(long time) {
         long millis = time;

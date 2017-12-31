@@ -2,15 +2,16 @@ package com.outrun.outrun;
 
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 public class LeaderboardEntry {
-    public int time;
-    public String name; //name will be derived from current user's Uid at time of submission
+    public long time;
+    public String userUid; //name will be derived from current user's Uid at time of submission
 
         public LeaderboardEntry() {
             time = 0;
-            name = null;
+            userUid = null;
         }
         
     public String timeToString() {

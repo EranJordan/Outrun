@@ -1,5 +1,9 @@
 package com.outrun.outrun;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -12,18 +16,33 @@ public class Course {
     public ArrayList<LatLng> points;
     public long distance;
     public String userUid;
-   // public TreeSet<LeaderboardEntry> leaderboard;
+    public ArrayList<LeaderboardEntry> leaderboard;
 
     public Course() {
         this.points = new ArrayList<>();
-      //  this.leaderboard = new TreeSet<LeaderboardEntry>(new entryComparator);
+        this.leaderboard = new ArrayList<>();
         this.distance = 0;
+    }
+
+    protected Course(Parcel in) {
+        points = in.createTypedArrayList(LatLng.CREATOR);
+        distance = in.readLong();
+        userUid = in.readString();
     }
 
     public ArrayList<LatLng> getPoints(){
         return this.points;
     }
 
+    public void addAndSortEntry(LeaderboardEntry entry) {
+        leaderboard.add(entry);
+        leaderboard.sort(new Comparator<LeaderboardEntry>() {
+            @Override
+            public int compare(LeaderboardEntry x, LeaderboardEntry y) {
+                return Long.compare(x.time, y.time);
+            }
+        });
+    }
 
     public LatLng get(int i) {
         return this.points.get(i);
@@ -32,6 +51,8 @@ public class Course {
     public int getSize(){
         return this.points.size();
     }
+
+    public int getLeaderboardSize() { return this.leaderboard.size(); }
 
     public void addPoint(LatLng point) {
         points.add(point);
@@ -62,11 +83,4 @@ public class Course {
         return (long)e;
     }
 
-
-    private class entryComparator implements Comparator<LeaderboardEntry> {
-        @Override
-        public int compare(LeaderboardEntry x, LeaderboardEntry y) {
-            return Long.compare(x.time, y.time);
-        }
-    }
 }
