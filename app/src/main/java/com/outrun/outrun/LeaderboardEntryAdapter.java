@@ -55,7 +55,6 @@ public class LeaderboardEntryAdapter extends ArrayAdapter<LeaderboardListEntry> 
         }
 
         Glide.with(mContext).load(entry.photo).into(viewHolder.photo);
-        Toast.makeText(mContext, entry.name, Toast.LENGTH_SHORT).show();
         viewHolder.txtName.setText(String.valueOf(entry.name));
         viewHolder.txtTime.setText(String.valueOf(entry.time));
 

@@ -96,7 +96,7 @@ public class RunCourseActivity extends AppCompatActivity
 
     private Runnable textViewChanger = new Runnable(){
         public void run() {
-            timeTextView.setText(timeToString(time));
+            timeTextView.setText("Time elapsed: " +timeToString(time));
             time +=1000;
             updateTime();
         }

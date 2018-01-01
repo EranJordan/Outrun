@@ -1,5 +1,4 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
@@ -16,6 +15,20 @@
         tools:context="com.outrun.outrun.MapsActivity"
         tools:layout="@layout/abc_list_menu_item_radio" />
 
+    <TextView
+        android:id="@+id/distance_textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="11dp"
+        android:background="@color/common_google_signin_btn_text_dark_default"
+        android:text="Distance:"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <ListView
         android:id="@+id/listView"
         style="@style/Widget.AppCompat.ListView.DropDown"
@@ -27,7 +40,12 @@
         android:layout_marginStart="124dp"
         android:layout_toEndOf="@id/content"
         android:background="@color/common_google_signin_btn_text_dark_default"
-        android:visibility="gone" />
+        android:elevation="4dp"
+        android:translationZ="4dp"
+        android:divider="#000000"
+        android:dividerHeight="1px"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/course_button"
@@ -42,16 +60,6 @@
         app:rippleColor="@android:color/white"
         app:srcCompat="@android:drawable/ic_input_add" />
 
-    <Button
-        android:id="@+id/run_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignTop="@+id/leaderboard_button"
-        android:layout_marginEnd="10dp"
-        android:text="Start Running"
-        android:visibility="gone" />
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/leaderboard_button"
         android:layout_width="wrap_content"
@@ -64,7 +72,18 @@
         android:clickable="true"
         android:visibility="gone"
         app:backgroundTint="@android:color/background_light"
-        app:srcCompat="@mipmap/ic_trophy_round" />
+        app:srcCompat="@mipmap/ic_trophy1_foreground" />
+
+    <Button
+        android:id="@+id/run_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/leaderboard_button"
+        android:layout_marginEnd="10dp"
+        android:password="false"
+        android:text="Start Running"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

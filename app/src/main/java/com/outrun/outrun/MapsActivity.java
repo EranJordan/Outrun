@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -68,7 +69,9 @@ public class MapsActivity extends AppCompatActivity
     public CourseTag courseTag;
     private DatabaseUtils databaseUtils;
     ListView listView;
+    ArrayList<LeaderboardListEntry> entries;
     private static LeaderboardEntryAdapter adapter;
+    private TextView distanceTextView;
 
 
     @Override
@@ -88,6 +91,7 @@ public class MapsActivity extends AppCompatActivity
         polylines = new ArrayList();
         databaseUtils = new DatabaseUtils();
         mAuth = FirebaseAuth.getInstance();
+        distanceTextView = findViewById(R.id.distance_textView2);
     }
 //
     @Override
@@ -110,6 +114,10 @@ public class MapsActivity extends AppCompatActivity
 
                 courseTag = (CourseTag) marker.getTag();
                 Course course = courseTag.course;
+                entries = new ArrayList<>();
+                for(int i = 0; i < course.getLeaderboardSize(); i++) {
+                    entries.add(new LeaderboardListEntry(courseTag.course.leaderboard.get(i)));
+                }
                 for(int i = 1; i < course.getSize(); i ++) {
                     DownloadTask downloadTask = new DownloadTask();
                     LatLng previousPoint = course.get(i - 1);
@@ -118,10 +126,11 @@ public class MapsActivity extends AppCompatActivity
                     // Start downloading json data from Google Directions API
                     downloadTask.execute(url);
                 }
+                distanceTextView.setVisibility(View.VISIBLE);
+                distanceTextView.setText("Distance: " + course.getDistance() + "m");
                 findViewById(R.id.course_button).setVisibility(View.GONE);
                 findViewById(R.id.run_button).setVisibility(View.VISIBLE);
                 findViewById(R.id.leaderboard_button).setVisibility(View.VISIBLE);
-                //TODO: make a button that sends you to RunCourseActivity appear
                 return true;
             }
         });
@@ -135,6 +144,7 @@ public class MapsActivity extends AppCompatActivity
                 if(findViewById(R.id.listView).getVisibility() == View.VISIBLE) {
                     findViewById(R.id.listView).setVisibility(View.GONE);
                 }
+                distanceTextView.setVisibility(View.GONE);
                 findViewById(R.id.run_button).setVisibility(View.GONE);
                 findViewById(R.id.leaderboard_button).setVisibility(View.GONE);
                 findViewById(R.id.course_button).setVisibility(View.VISIBLE);
@@ -275,11 +285,11 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void showLeaderboards() {
-        findViewById(R.id.listView).setVisibility(View.VISIBLE);
-        ArrayList<LeaderboardListEntry> entries = new ArrayList<>();
+/*        ArrayList<LeaderboardListEntry> entries = new ArrayList<>();
         for(int i = 0; i < courseTag.course.getLeaderboardSize(); i++) {
             entries.add(new LeaderboardListEntry(courseTag.course.leaderboard.get(i)));
-        }
+        }*/
+        findViewById(R.id.listView).setVisibility(View.VISIBLE);
         adapter = new LeaderboardEntryAdapter(entries, getApplicationContext());
         listView.setAdapter(adapter);
     }

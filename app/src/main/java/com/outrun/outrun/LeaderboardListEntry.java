@@ -20,10 +20,9 @@ public class LeaderboardListEntry {
     public LeaderboardListEntry(LeaderboardEntry entry) {
         this.entry = entry;
         this.time = entry.timeToString();
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference reference = mDatabase.child("users").child(entry.userUid);
-        if(reference == null) this.name = "HI";
-        reference.addValueEventListener(new ValueEventListener() {
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users").child(entry.userUid);
+        mDatabase.addValueEventListener(new ValueEventListener() {
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                setName((String) dataSnapshot.child("name").getValue());
@@ -32,7 +31,6 @@ public class LeaderboardListEntry {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }
