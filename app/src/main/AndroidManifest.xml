@@ -59,8 +59,9 @@
             android:label="@string/title_activity_create_course" />
         <activity
             android:name=".RunCourseActivity"
-            android:label="Run!"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:label="Run!"/>
+
+
     </application>
     <meta-data android:name="com.google.android.gms.version"
         android:value="@integer/google_play_services_version" />
