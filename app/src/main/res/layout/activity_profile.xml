@@ -81,11 +81,12 @@
         <TextView
             android:id="@+id/run_text"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/map_button"
             android:layout_alignStart="@+id/name_textView"
-            android:paddingTop="2dp"
+            android:layout_marginBottom="5dp"
             android:text="Start Running"
+            android:textSize="24sp"
             app:layout_constraintBottom_toTopOf="@+id/signout_text"
             tools:layout_editor_absoluteX="83dp"
             tools:text="Start Running" />
@@ -93,11 +94,12 @@
         <TextView
             android:id="@+id/signout_text"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/signout_button"
             android:layout_alignStart="@+id/run_text"
-            android:paddingTop="2dp"
+            android:layout_marginBottom="5dp"
             android:text="Sign Out"
+            android:textSize="24sp"
             tools:layout_editor_absoluteX="85dp"
             tools:layout_editor_absoluteY="415dp" />
     </RelativeLayout>

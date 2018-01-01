@@ -182,7 +182,11 @@ public class GoogleSignInActivity extends BaseActivity implements
             String name = user.getDisplayName();
             final TextView nameTextView = findViewById(R.id.name_textView);
             nameTextView.setText(name);
-            Uri profileImage = user.getPhotoUrl();
+
+            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+            final Uri profileImage = account.getPhotoUrl();
+
+            //Uri profileImage = user.getPhotoUrl();
             Glide.with(this).load(profileImage).into((ImageView) findViewById(R.id.profile_imageView));
             findViewById(R.id.profile_imageView).setVisibility(View.VISIBLE);
             findViewById(R.id.name_textView).setVisibility(View.VISIBLE);
@@ -216,6 +220,10 @@ public class GoogleSignInActivity extends BaseActivity implements
         //Check if user is in database, if not add him
         final FirebaseUser user = mAuth.getCurrentUser();
         final String userUid = user.getUid();
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        final Uri profileImage = account.getPhotoUrl();
+
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.child("users").child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -223,7 +231,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                 if (!dataSnapshot.exists()) { //if user doesn't exist, add to database
                     mDatabase.child("users").child(userUid).setValue(userUid);
                     mDatabase.child("users").child(userUid).child("name").setValue(user.getDisplayName());
-                    mDatabase.child("users").child(userUid).child("photo").setValue(user.getPhotoUrl().toString());
+                    mDatabase.child("users").child(userUid).child("photo").setValue(profileImage.toString());
                 }
             }
 
