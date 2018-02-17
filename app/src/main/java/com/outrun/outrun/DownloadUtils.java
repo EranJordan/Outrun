@@ -15,28 +15,20 @@ public class DownloadUtils {
     public DownloadUtils() {
 
     }
-
     public String getDirectionsUrl(LatLng origin, LatLng dest) {
-
         // Origin of route
         String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-
         // Destination of route
         String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-
         // Sensor enabled
         String sensor = "sensor=false";
         String mode = "mode=walking";
         // Building the parameters to the web service
         String parameters = str_origin + "&" + str_dest + "&" + sensor + "&" + mode;
-
         // Output format
         String output = "json";
-
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
-
-
         return url;
     }
 
@@ -49,26 +41,18 @@ public class DownloadUtils {
         HttpURLConnection urlConnection = null;
         try {
             URL url = new URL(strUrl);
-
             urlConnection = (HttpURLConnection) url.openConnection();
-
             urlConnection.connect();
-
             iStream = urlConnection.getInputStream();
-
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
             StringBuffer sb = new StringBuffer();
-
             String line = "";
+
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
-
             data = sb.toString();
-
             br.close();
-
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         } finally {

@@ -58,14 +58,12 @@ public class Course {
         points.add(point);
     }
 
-
     public void updateDist(LatLng a, LatLng b) {
         distance += distance(a,b);
     }
     public long getDistance() {
         return distance;
     }
-
 
     public long distance(LatLng a, LatLng b) {
         long R = 6378100; // meters
@@ -82,5 +80,4 @@ public class Course {
         double e = R * d;
         return (long)e;
     }
-
 }

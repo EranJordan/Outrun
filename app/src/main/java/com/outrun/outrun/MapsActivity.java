@@ -228,7 +228,6 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
-
     /**
      * Displays a dialog with error message explaining that the location permission is missing.
      */
@@ -260,8 +259,8 @@ public class MapsActivity extends AppCompatActivity
                 Intent createCourseIntent = new Intent(this, CreateCourseActivity.class);
                 startActivity(createCourseIntent);
                 break;
-            case R.id.run_button:
 
+            case R.id.run_button:
                 Intent runCourseIntent = new Intent(this, RunCourseActivity.class);
                 Bundle mBundle = new Bundle();
                 mBundle.putString("thisUserUid", mAuth.getCurrentUser().getUid());
@@ -275,6 +274,7 @@ public class MapsActivity extends AppCompatActivity
                 runCourseIntent.putExtra("bundle", mBundle);
                 startActivity(runCourseIntent);
                 break;
+
             case R.id.leaderboard_button:
                 if(findViewById(R.id.listView).getVisibility() == View.VISIBLE) {
                     findViewById(R.id.listView).setVisibility(View.GONE);
@@ -285,7 +285,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void showLeaderboards() {
-/*        ArrayList<LeaderboardListEntry> entries = new ArrayList<>();
+	/*  ArrayList<LeaderboardListEntry> entries = new ArrayList<>();
         for(int i = 0; i < courseTag.course.getLeaderboardSize(); i++) {
             entries.add(new LeaderboardListEntry(courseTag.course.leaderboard.get(i)));
         }*/
@@ -299,12 +299,9 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
-
         @Override
         protected String doInBackground(String... url) {
-
             String data = "";
-
             try {
                 data = downloadUtils.downloadUrl(url[0]);
             } catch (Exception e) {
@@ -316,24 +313,17 @@ public class MapsActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             ParserTask parserTask = new ParserTask();
-
-
             parserTask.execute(result);
-
         }
     }
 
     public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
         // Parsing the data in non-ui thread
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
-
             try {
                 jObject = new JSONObject(jsonData[0]);
                 DirectionsJSONParser parser = new DirectionsJSONParser();
@@ -352,7 +342,6 @@ public class MapsActivity extends AppCompatActivity
             for (int i = 0; i < result.size(); i++) {
                 points = new ArrayList();
                 List<HashMap<String, String>> path = result.get(i);
-
                 for (int j = 0; j < path.size(); j++) {
                     HashMap<String, String> point = path.get(j);
 

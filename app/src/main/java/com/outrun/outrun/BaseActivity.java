@@ -5,7 +5,6 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 
 public class BaseActivity extends AppCompatActivity {
-
     @VisibleForTesting
     public ProgressDialog mProgressDialog;
 
@@ -15,7 +14,6 @@ public class BaseActivity extends AppCompatActivity {
             mProgressDialog.setMessage(getString(R.string.loading));
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
     }
 
@@ -30,5 +28,4 @@ public class BaseActivity extends AppCompatActivity {
         super.onStop();
         hideProgressDialog();
     }
-
 }

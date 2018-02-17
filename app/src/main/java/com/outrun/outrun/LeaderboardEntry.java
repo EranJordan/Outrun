@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class LeaderboardEntry {
     public long time;
     public String userUid; //name will be derived from current user's Uid at time of submission
-
+    
         public LeaderboardEntry() {
             time = 0;
             userUid = null;
@@ -21,7 +21,6 @@ public class LeaderboardEntry {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
         millis -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
-
         StringBuilder sb = new StringBuilder(64);
         sb.append(hours);
         sb.append("h:");

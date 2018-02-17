@@ -33,18 +33,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    // permission was granted, yay! Start the app
 
                 } else {
-                    System.exit(0); //should add message explaining
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    System.exit(0); 
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -54,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "On Destroy .....");
     }
     /* (non-Javadoc)
     * @see android.app.Activity#onPause()
@@ -62,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i(TAG, "On Pause .....");
     }
 
     /* (non-Javadoc)
@@ -71,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.i(TAG, "On Restart .....");
     }
 
     /* (non-Javadoc)
@@ -80,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "On Resume .....");
     }
 
     /* (non-Javadoc)
@@ -91,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         super.onStart();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         redirectUI(account);
-        Log.i(TAG, "On Start .....");
     }
 
     protected void redirectUI(GoogleSignInAccount account) {
@@ -111,6 +100,5 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i(TAG, "On Stop .....");
     }
 }

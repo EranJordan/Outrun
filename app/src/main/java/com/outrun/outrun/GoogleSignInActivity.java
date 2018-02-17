@@ -182,7 +182,6 @@ public class GoogleSignInActivity extends BaseActivity implements
             String name = user.getDisplayName();
             final TextView nameTextView = findViewById(R.id.name_textView);
             nameTextView.setText(name);
-
             GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
             final Uri profileImage = account.getPhotoUrl();
 
@@ -213,14 +212,12 @@ public class GoogleSignInActivity extends BaseActivity implements
             Intent profile = new Intent(this, ProfileActivity.class);
             startActivity(profile);
         }
-
     }
 
     private void updateDatabase() {
         //Check if user is in database, if not add him
         final FirebaseUser user = mAuth.getCurrentUser();
         final String userUid = user.getUid();
-
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         final Uri profileImage = account.getPhotoUrl();
 
@@ -241,5 +238,4 @@ public class GoogleSignInActivity extends BaseActivity implements
             }
         });
     }
-
 }

@@ -76,7 +76,6 @@ public class CreateCourseActivity extends AppCompatActivity
         distanceTextView = findViewById(R.id.distance_textView);
     }
 
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -102,7 +101,6 @@ public class CreateCourseActivity extends AppCompatActivity
                 markers.add(marker);
                 course.addPoint(point);
                 if (course.getSize() > 1) {
-
                     PolylineOptions polyLine = new PolylineOptions().color(
                             Color.BLUE).width((float) 7.0);
                     polyLine.add(point);
@@ -129,7 +127,8 @@ public class CreateCourseActivity extends AppCompatActivity
             // Permission to access the location is missing.
             PermissionUtils.requestPermission(this, MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION, true);
-        } else if (mMap != null) {
+        } 
+        else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -151,6 +150,7 @@ public class CreateCourseActivity extends AppCompatActivity
     public boolean onMyLocationButtonClick() {
         return false;
     }
+
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
@@ -160,18 +160,19 @@ public class CreateCourseActivity extends AppCompatActivity
             mPermissionDenied = false;
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode != MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
             return;
         }
-
         if (PermissionUtils.isPermissionGranted(permissions, grantResults,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
             // Enable the my location layer if the permission has been granted.
             enableLocation();
-        } else {
+        } 
+        else {
             // Display the missing permission error dialog when the fragments resume.
             mPermissionDenied = true;
         }
@@ -199,7 +200,6 @@ public class CreateCourseActivity extends AppCompatActivity
             return;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
         final Intent mapIntent = new Intent(this, MapsActivity.class);
 
         builder.setMessage("Select course type")
@@ -243,8 +243,7 @@ public class CreateCourseActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         Intent intent = new Intent(this,MapsActivity.class); //go to new instance of mapsactivity
         startActivity(intent);
     }
@@ -254,10 +253,8 @@ public class CreateCourseActivity extends AppCompatActivity
     }
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
-
         @Override
         protected String doInBackground(String... url) {
-
             String data = "";
 
             try {
@@ -271,28 +268,21 @@ public class CreateCourseActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             ParserTask parserTask = new ParserTask();
-
-
             parserTask.execute(result);
-
         }
     }
 
     public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
         // Parsing the data in non-ui thread
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
 
             try {
                 jObject = new JSONObject(jsonData[0]);
                 DirectionsJSONParser parser = new DirectionsJSONParser();
-
                 routes = parser.parse(jObject);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -307,12 +297,10 @@ public class CreateCourseActivity extends AppCompatActivity
             for (int i = 0; i < result.size(); i++) {
                 points = new ArrayList();
                 lineOptions = new PolylineOptions();
-
                 List<HashMap<String, String>> path = result.get(i);
 
                 for (int j = 0; j < path.size(); j++) {
                     HashMap<String, String> point = path.get(j);
-
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
@@ -330,7 +318,6 @@ public class CreateCourseActivity extends AppCompatActivity
                 if(points.size()!= 0) {
                     mMap.addPolyline(lineOptions);  //this line is bad
                     distanceTextView.setText("Distance: " + course.getDistance() + "m");
-
                 }
             }
         }
